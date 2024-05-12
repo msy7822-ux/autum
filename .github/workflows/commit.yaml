@@ -1,0 +1,36 @@
+name: Update and Merge
+
+on:
+  schedule:
+    # UTCで指定するため、日本時間の9:00は0:00 UTCに相当します。
+    # 日本はUTCより9時間進んでいるため、0:00 - 9時間 = 15:00 UTCに設定します。
+    - cron: "0 0 * * *"
+
+jobs:
+  update-file:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Update file
+        run: |
+          echo "Updated on $(date)" >> file.txt
+
+      - name: Commit and push
+        run: |
+          git config --global user.name 'msy7822-ux'
+          git config --global user.email 'msy780022@gmail.com'
+          git add .
+          git commit -m "Update file"
+          git push
+
+      - name: Create Pull Request
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: "main"
+          destination_branch: "main"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pr_title: "Automated update"
+          pr_body: "Automatically updating file"
